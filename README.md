@@ -2,7 +2,7 @@
 
 Twitter Streaming API statistics
 
-### Running 
+### Running
 
 In order to run tweets you will need several tokens from your Twitter developer account. Once you've obtained those simply run one of the following commands: 
 
@@ -20,11 +20,13 @@ re-start consumer_key consumer_secret access_token access_token_secret
 
 Tweets architecture is broadly broken down into two components. The first component is the twitter streaming client (`TwitterStreaming.scala`), which is responsible for connecting to Twitter's streaming api, parsing the payload into `argonaut.Json`, and enqueing it for the backend process. The backend process (`Pipeline.scala`) consumes the queue, extracts various pieces of data from each tweet, and reduces statistics via the `Stat Monoid`. It's important to note that the streaming client will never be blocked or slowed down by a slow backend process, and each component can be scaled independently to keep up the tweet velocity.
 
-#### Know Issues and Other Considerations
+### Considerations
 
 The current implementation uses a circular buffer as a queue between the streaming client and processing backend. This means that if the queue fills up tweets will be silently dropped. Using a bounded queue would allow us to detect when the queue is full and react to it, but doesn't solve the problem of dropping tweets. Ideally we would be able to detect when the backend process is lagging and proactively scale up the service.
 
-Because streams are infinite finding the top-k frequent items is challenging when considering things like memory constraints.
+Finding the top-k frequent items in an infinite steam is challenging when considering things like memory constraints and unbounded sets of items. The first approach I took was to store *all* item frequencies in a `Map[Item, Long]`, and then sort by frequency to get the top-k. The advantage to this approach is accuracy, but memory usage can be unbounded when dealing with unbounded item sets, and sorting can become impossible. The second approach is based on Lossy Counting described here: https://en.wikipedia.org/wiki/Lossy_Count_Algorithm.
+
+
 
 ### Http
 

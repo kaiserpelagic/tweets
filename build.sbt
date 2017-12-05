@@ -1,10 +1,14 @@
+scalaVersion in Global := "2.11.8"
 
-resolvers += "Sonatype" at "https://oss.sonatype.org/content/repositories/releases"
-
-val http4sV = "0.16.5a"
-val scalazV = "7.2.16"
+lazy val root = project.in(file("."))
 
 mainClass in Compile := Some("tweets.Main")
+
+resolvers += Resolver.url("typesafe", url("http://repo.typesafe.com/typesafe/ivy-releases/"))(Resolver.ivyStylePatterns)
+
+val http4sV = "0.16.5a"
+
+val scalazV = "7.2.16"
 
 libraryDependencies ++= Seq(
   "org.scalaz"  %% "scalaz-core"         % scalazV,

@@ -8,7 +8,7 @@ import scalaz._, Scalaz._
 import _root_.argonaut.Json
 
 /*
- * Pipeline for processing of tweets. The frontend streaming client is decoupled from
+ * Backend for processing of tweets. The frontend streaming client is decoupled from
  * background processing via a Queue, in this case a CircularBuffer. 
  *
  * The Pipeline is responsible for extracting interesting information from tweets and

@@ -23,9 +23,9 @@ class Service(start: Instant, stats: Signal[Stat]) {
         val percentEmoji = formatDouble(100 * stat.emojiCount.toDouble / stat.tweetCount.toDouble)
         val percentUrl = formatDouble(100 * stat.urlCount.toDouble / stat.tweetCount.toDouble)
         val percentPhoto = formatDouble(100 * stat.photoCount.toDouble / stat.tweetCount.toDouble)
-        val topHash = stat.hashtags.toList.sortWith(_._2 > _._2).take(5).map(x => Count(x._1, x._2))
-        val topDomain = stat.domains.toList.sortWith(_._2 > _._2).take(5).map(x => Count(x._1, x._2))
-        val topEmoji = stat.emojis.toList.sortWith(_._2 > _._2).take(5).map(x => Count(x._1, x._2))
+        val topHash = stat.hashtags.get.topK(5).map(x => Count(x._1, x._2))
+        val topDomain = stat.domains.get.topK(5).map(x => Count(x._1, x._2))
+        val topEmoji = stat.emojis.get.topK(5).map(x => Count(x._1, x._2))
         val avg = Average(stat.tweetCount, dur)
         val res = TwitterReport(stat.tweetCount, stat.emojiCount, stat.photoCount, stat.urlCount,
                     formatDouble(avg.perSecond), formatDouble(avg.perMinute), formatDouble(avg.perHour),

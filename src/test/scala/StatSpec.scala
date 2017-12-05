@@ -7,20 +7,19 @@ import Stat._
 
 class StatSpec extends Properties("Stat Monoid") {
 
+  val threshold = 10
+
   implicit val arbitraryStat = 
     Arbitrary {
       for {
-        long1 <- Arbitrary.arbitrary[Long] 
-        long2 <- Arbitrary.arbitrary[Long] 
-        long3 <- Arbitrary.arbitrary[Long] 
-        long4 <- Arbitrary.arbitrary[Long] 
-        long5 <- Arbitrary.arbitrary[Long] 
-        long6 <- Arbitrary.arbitrary[Long] 
-        long7 <- Arbitrary.arbitrary[Long] 
-        str1 <- Arbitrary.arbitrary[String] 
-        str2 <- Arbitrary.arbitrary[String] 
-        str3 <- Arbitrary.arbitrary[String] 
-      } yield Stat(long1,long2,long3,long4,Map(str1 -> long5),Map(str2 -> long6), Map(str3 -> long7)) 
+        long1 <- Gen.posNum[Long]
+        long2 <- Gen.posNum[Long]
+        long3 <- Gen.posNum[Long]
+        long4 <- Gen.posNum[Long]
+        str1 <- Arbitrary.arbitrary[String]
+        str2 <- Arbitrary.arbitrary[String]
+        str3 <- Arbitrary.arbitrary[String]
+      } yield Stat(long1,long2,long3,long4, Some(Counter(str1, threshold)), Some(Counter(str2, threshold)), Some(Counter(str3, threshold)))
   }
 
   def checkAll(name: String, props: Properties): Unit = {

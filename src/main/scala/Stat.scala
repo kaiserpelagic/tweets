@@ -1,26 +1,25 @@
 package tweets
 
 import scalaz._, Scalaz._
-import scala.collection.immutable.Map
 
 /*
- * All the stats we care about, in one place. Occurances of hashtags, domains, and emojis
- * are stored in a Map. These will continue to grow without bound.
- * Some kind of pruning mechanism should be implemented to make it's more robust.
+ * All the stats we care about, in one place. The monoid instance is used
+ * in the backend processing pipeline to scan over the stream and combine
+ * all the stats into one.
  */
 final case class Stat(
   tweetCount: Long,
   emojiCount: Long,
   urlCount: Long,
   photoCount: Long,
-  hashtags: Map[String, Long],
-  domains: Map[String, Long],
-  emojis: Map[String, Long]
+  hashtags: Option[Counter[String]],
+  domains: Option[Counter[String]],
+  emojis: Option[Counter[String]]
 )
 
 object Stat {
 
-  val empty: Stat = Stat(0,0,0,0, Map.empty[String,Long], Map.empty[String,Long], Map.empty[String,Long])
+  val empty: Stat = Stat(0,0,0,0, None, None, None)
 
   implicit val StatMonoid: Monoid[Stat] = new Monoid[Stat] {
 
@@ -47,20 +46,15 @@ object Stat {
     def containsPhoto(domains: List[String]): Boolean =
         domains.exists(d => d.contains("pic.twitter.com") || d.contains("instagram.com"))
     
-    // Very simple test for emojis. 
-    // TODO: explain how we could do better about parsing
-    def extractEmojis(text: String): List[String] =
-      text.toList.flatMap(e => emojiData.get(e.toHexString.toUpperCase))
-    
     val tweetCount = 1 // a tweet is always tweet
-    val emojis     = extractEmojis(tweet.text)
+    val emojis     = Emoji.extract(tweet, emojiData)
     val domains    = Tweet.domains(tweet)
-    val emojiCount = if (emojis.length > 0) 1 else 0
+    val emojiCount = if (emojis.nonEmpty) 1 else 0
     val urlCount   = if (tweet.urls.nonEmpty) 1 else 0
     val photoCount = if (containsPhoto(domains)) 1 else 0
-    val hashtagsMap = tweet.hashtags.map(_.text -> 1L).toMap
-    val domainsMap  = domains.map(_ -> 1L).toMap
-    val emojisMap   = emojis.map(_ -> 1L).toMap 
+    val hashtagsMap = tweet.hashtags.map(t => Counter(t.text, 100)).reduceOption(_ |+| _)
+    val domainsMap  = domains.map(d => Counter(d, 100)).reduceOption(_ |+| _)
+    val emojisMap   = emojis.map(s => Counter(s, 100)).reduceOption(_ |+| _)
 
     Stat(tweetCount, emojiCount, urlCount, photoCount, hashtagsMap, domainsMap, emojisMap)
   }

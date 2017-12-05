@@ -4,6 +4,7 @@ import scala.io.Source
 import _root_.argonaut._, Argonaut._
 import scalaz._, Scalaz._
 
+
 /*
  * Loads an emoji data file, parses it, and loads the data into a Map[Unicode, ShortName]
  */
@@ -23,4 +24,8 @@ object Emoji {
     \/.fromTryCatchNonFatal(
       Source.fromInputStream(
         getClass.getResourceAsStream(path)).mkString).leftMap(_.toString)
+
+  // Very simple test for emojis.
+  def extract(tweet: Tweet, emojiData: EmojiData): List[String] =
+    tweet.text.toList.flatMap(e => emojiData.get(e.toHexString.toUpperCase))
 }
