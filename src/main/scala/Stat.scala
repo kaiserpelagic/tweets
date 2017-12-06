@@ -52,9 +52,9 @@ object Stat {
     val emojiCount = if (emojis.nonEmpty) 1 else 0
     val urlCount   = if (tweet.urls.nonEmpty) 1 else 0
     val photoCount = if (containsPhoto(domains)) 1 else 0
-    val hashtagsMap = tweet.hashtags.map(t => Counter(t.text, 100)).reduceOption(_ |+| _)
-    val domainsMap  = domains.map(d => Counter(d, 100)).reduceOption(_ |+| _)
-    val emojisMap   = emojis.map(s => Counter(s, 100)).reduceOption(_ |+| _)
+    val hashtagsMap = tweet.hashtags.map(t => Counter(t.text, 1000)).reduceOption(_ |+| _)
+    val domainsMap  = domains.map(d => Counter(d, 1000)).reduceOption(_ |+| _)
+    val emojisMap   = emojis.map(s => Counter(s, 1000)).reduceOption(_ |+| _)
 
     Stat(tweetCount, emojiCount, urlCount, photoCount, hashtagsMap, domainsMap, emojisMap)
   }
